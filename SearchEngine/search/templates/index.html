@@ -5,11 +5,11 @@
 <br/>
 <br/>
 <div class="page-header header-filter"
-     style="background-image: url({% static "search/assets/img/search-background.jpg"%}); background-size: cover; background-position: top center;">
+     style="background-image: url({% static "search/assets/img/search-background.jpg"%}); background-size: cover; ">
 <div class="container">
     <div class="row">
-        <div class="col-lg-8 col-md-6 ml-auto mr-auto">
-            <div class="card card-login">
+        <div class="col-lg-10 col-md-6 ml-auto mr-auto">
+            <div class="card">
                 <form class="form" method="POST" action="">
                     {% csrf_token %}
                     <div class="card-body">
@@ -25,7 +25,9 @@
 
                     </div>
                     <div class="footer text-center">
-                        <a href="#pablo" class="btn btn-primary btn-link btn-wd btn-lg">پیدا کن</a>
+                        <button class="btn btn-primary btn-link">با قدرت بگرد
+                            <div class="ripple-container"></div>
+                        </button>
                     </div>
                 </form>
             </div>
