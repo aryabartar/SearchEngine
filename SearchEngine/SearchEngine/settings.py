@@ -120,7 +120,6 @@ STATICFILES_DIRS = [
     '/var/www/static/',
 ]
 
-
 # -------
 # -------
 
@@ -378,18 +377,10 @@ def parse_input(user_input):
 
         return changed_user_input, source_value, cat_value
 
-    print("=>0.1")
     user_input, first_list = find_double_quotation(user_input)
-    print("=>0.2")
-
     user_input, second_list = find_not(user_input)
-    print("=>0.3")
-
     user_input, source_value, cat_value = cat_and_source_finder(user_input)
-    print("=>0.4")
-
     third_list = find_other_words(user_input)
-    print("=>0.5")
 
     dict = {
         "with_quotation": first_list,
@@ -584,11 +575,6 @@ def get_input(u_input):
             final_statement = temp3
             temp3 = []
     final_statement = list(dict.fromkeys(final_statement))
-    # print(final_statement)
-
-    # print(final_statement)
-    # print(final_one)
-    # print(final_not)
 
     if flag1 == 1 and flag2 == 0 and flag3 == 0:
         my_result = set(final_not).intersection(set(final_statement))
@@ -606,28 +592,13 @@ def get_input(u_input):
         my_result = set(final_one)
     elif flag1 == 0 and flag2 == 0 and flag3 == 0:
         my_result = set(final_one).intersection(set(final_not), set(final_statement))
-    print(my_result)
-    title = []
-    pic = []
-    content = []
-    date = []
-    with open(CSV_PATH, encoding="utf8") as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        rows = list(csv_reader)
 
-    for i in my_result:
-        title.append(rows[i][1])
-        pic.append(rows[i][6])
-        content.append(rows[i][5])
-        date.append(rows[i][0])
+    result_list = []
+    for item in my_result:
+        post = posts_list[item - 1]
+        result_list.append([post.title, post.thumbnail, post.summary, post.id, post.publish_date, post.url])
 
-    result_dict = {
-        "title": title,
-        "content": content,
-        "pic": pic,
-        "date": date,
-    }
-    return result_dict
+    return result_list
 
 
 print("STARTING SETTINGS-----\nSTART-----\n")

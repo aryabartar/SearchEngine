@@ -28,9 +28,9 @@ def search(request):
         if form.is_valid():
             # user_input = form.cleaned_data['user_input']
             # print(user_input)
-            result_dict = get_input('"اشیای تاریخی فرهنگی" !قاچاق')
+            result_list = get_input('"اشیای تاریخی فرهنگی" !قاچاق')
 
-            return render(request, 'search_result.html', )
+            return render(request, 'search-result.html', {"result_list": result_list})
     else:
         form = SearchForm()
         context = {
