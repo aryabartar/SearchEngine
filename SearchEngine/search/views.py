@@ -23,19 +23,17 @@ def post(request, post_id):
 
 
 def search(request):
-    # # settings.get_input1('"اشیای تاریخی فرهنگی" قاچاق')
-    # if request.method == 'POST':
-    #     form = SearchForm(request.POST)
-    #     if form.is_valid():
-    #         # user_input = form.cleaned_data['user_input']
-    #         # print(user_input)
-    #         result_dict = get_input('"اشیای تاریخی فرهنگی" !قاچاق')
-    #
-    #         return render(request, 'search_result.html', )
-    # else:
-    #     form = SearchForm()
-    #     context = {
-    #         'form': form,
-    #     }
-    #     return render(request, 'index.html', context)
-    pass
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            # user_input = form.cleaned_data['user_input']
+            # print(user_input)
+            result_dict = get_input('"اشیای تاریخی فرهنگی" !قاچاق')
+
+            return render(request, 'search_result.html', )
+    else:
+        form = SearchForm()
+        context = {
+            'form': form,
+        }
+        return render(request, 'index.html', context)
