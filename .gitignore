@@ -6,7 +6,6 @@ db.sqlite3
 media/
 files/
 venv/
-assets/
 sneeds/local.py
 APIs.py
 passwords.py
