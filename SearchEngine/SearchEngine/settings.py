@@ -115,13 +115,18 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR + "/static",
+    '/var/www/static/',
+]
+
+
 # -------
 # -------
 
 
 import csv
 
-rows = []
 FUTURE = ['نخواهند', 'نخواهید', 'نخواهیم', 'نخواهد', 'نخواهی', 'نخواهم', 'بخواهند', 'بخواهید', 'بخواهیم', 'بخواهد',
           'بخواهی', 'بخواهم', 'خواهند', 'خواهید', 'خواهیم', 'خواهد', 'خواهی', 'خواهم']
 PREFIX_MOZARE = ["می", "نمی", "ب", "ن"]
@@ -132,6 +137,7 @@ PRESENT_ROOT = ['شو', 'کن']
 STOP_WORDS_LIST = ['از', 'با', 'را', 'و']
 SYNONYM_WORDS_DICT = {'تهران': ['طهران'], 'ماشین': ['اتومبیل']}
 not_list = list(range(1, 1731))
+posts_list = []
 rows = []
 
 
@@ -269,7 +275,7 @@ class Post:
         return str(self.title)
 
     def __str__(self):
-        return str(self.title)
+        return "Title: " + str(self.title) + " | Number: " + str(self.id)
 
 
 def save_xlx_to_csv(xlx_address, csv_address):
@@ -622,6 +628,7 @@ def get_input(u_input):
         "date": date,
     }
     return result_dict
+
 
 print("STARTING SETTINGS-----\nSTART-----\n")
 
