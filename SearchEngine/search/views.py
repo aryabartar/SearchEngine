@@ -26,9 +26,9 @@ def search(request):
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
-            # user_input = form.cleaned_data['user_input']
-            # print(user_input)
-            result_list = get_input('"اشیای تاریخی فرهنگی" !قاچاق')
+            user_input = form.cleaned_data['user_input']
+            print(user_input)
+            # result_list = get_input('"اشیای تاریخی فرهنگی" !قاچاق')
 
             return render(request, 'search-result.html', {"result_list": result_list})
     else:

@@ -2,28 +2,34 @@
 {% load static %}
 
 {% block main_content %}
-<br/>
-<br/>
 <div class="page-header header-filter"
-     style="background-image: url('{% static "
-     search/assets/img/bg7.jpg" %}'); background-size: cover; background-position: top center;">
-<div class="container">
-    <div class="row">
-        <div class="col-lg-4 col-md-6 ml-auto mr-auto">
-            <div class="card card-login">
+     style="background-image: url('../assets/img/bg7.jpg'); background-size: cover; background-position: top center;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-md-6 ml-auto mr-auto">
+                <div class="card card-login">
+                    <form class="form" method="POST" action="">
+                        {% csrf_token %}
+                        <div class="card-body">
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="material-icons">search</i>
+                    </span>
+                                </div>
+                                <input dir="rtl" type="text" class="form-control" placeholder="جستجو ...">
 
-                <form class="form" action="" method="post">
-                    {% csrf_token %}
-                    <table>
+                            </div>
 
-                        {{ form.as_table }}
-
-                    </table>
-                    <input type="submit" value="Submit">
-                </form>
+                        </div>
+                        <div class="footer text-center">
+                            <button name="foo" value="upvote">Upvote</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
-</div>
+
 {% endblock %}
