@@ -251,6 +251,7 @@ STATICFILES_DIRS = [
 
 
 import csv
+from .string_manipulating_functions import remove_ha, remove_aan, manipulate_query, combination_connector
 
 FUTURE = ['نخواهند', 'نخواهید', 'نخواهیم', 'نخواهد', 'نخواهی', 'نخواهم', 'بخواهند', 'بخواهید', 'بخواهیم', 'بخواهد',
           'بخواهی', 'بخواهم', 'خواهند', 'خواهید', 'خواهیم', 'خواهد', 'خواهی', 'خواهم']
@@ -260,10 +261,13 @@ PAST = ['باشند', 'باشید', 'باشیم', 'باشد', 'باشی', 'با�
         'اید', 'ایم', 'است', 'ای', 'ام', 'ند', 'ید', 'یم', '', 'ی', 'م']
 PRESENT_ROOT = ['شو', 'کن']
 STOP_WORDS_LIST = ['از', 'با', 'را', 'و']
+# COMBINATIONAL_WORDS = ['فی مابین']
+COMBINATIONAL_WORDS = ['عن قریب', 'من جمله', 'فی ذلک', 'مع هذا', 'علی حده', 'فی مابین']
 SYNONYM_WORDS_DICT = {'تهران': ['طهران'], 'ماشین': ['اتومبیل']}
 not_list = list(range(1, 1731))
 posts_list = []
 rows = []
+all_tokens_set = set()
 
 
 class Post:
@@ -301,8 +305,9 @@ class Post:
                 while j < len(user_input) and ord(user_input[j]) in ALLOWED_ASCII_CODES:
                     j += 1
 
-                token_list.append(user_input[i:j])
-
+                token = user_input[i:j]
+                token_list.append(token)
+                all_tokens_set.add(token)
                 i = j + 1
 
             else:
@@ -311,21 +316,9 @@ class Post:
         return token_list
 
     def remove_plural_from_token(self):
-        def remove_ha(string):
-            if len(string) > 2:
-                if string[len(string) - 2: len(string) + 1] == "ها":
-                    string = string[0:len(string) - 2]
-            return string
-
-        def remove_aan(string):
-            # if len(string) > 2:
-            #     if string[len(string) - 2: len(string) + 1] == "ان":
-            #         string = string[0:len(string) - 2]
-            return string
-
         for i in range(0, len(self.content_token_list)):
             self.content_token_list[i] = remove_ha(self.content_token_list[i])
-            self.content_token_list[i] = remove_aan(self.content_token_list[i])
+            self.content_token_list[i] = remove_aan(self.content_token_list[i], all_tokens_set)
 
     def delete_stop_words(self):
         j = len(self.content_token_list) - 1
@@ -353,6 +346,17 @@ class Post:
                 temp_str = self.content_token_list[i] + self.content_token_list[i + 1]
                 temp_array.append(temp_str)
                 i += 1
+            elif self.content_token_list[i - 1] not in word_list:
+                temp_array.append(self.content_token_list[i])
+        self.content_token_list = temp_array
+
+    def _derive_bon_from_ayande(self, word_list):
+        temp_array = []
+        for i in range(0, len(self.content_token_list) - 1):
+            if self.content_token_list[i] in word_list:
+                temp_str = self.content_token_list[i + 1]
+                temp_array.append(temp_str)
+                i += 1
             else:
                 temp_array.append(self.content_token_list[i])
         self.content_token_list = temp_array
@@ -375,6 +379,9 @@ class Post:
 
     def concat_ayande(self):
         self._concat_based_on_list(FUTURE)
+
+    def derive_bon_ayande(self):
+        self._derive_bon_from_ayande(FUTURE)
 
     def derive_bon_from_mozare(self):
         def get_bon_from_word(word):
@@ -419,16 +426,19 @@ def create_post_objects(csv_path):
         for row in rows[1:]:
             post_obj = Post(id, *row)
             post_obj.set_token_list()
+            posts_list.append(post_obj)
+            id += 1
+
+        for post_obj in posts_list:
             post_obj.remove_plural_from_token()
             post_obj.case_folding()
+            combination_connector(post_obj.content_token_list, COMBINATIONAL_WORDS)
             post_obj.present_verb_correction()
             post_obj.concat_nim_fasele()
-            post_obj.concat_ayande()
+            #post_obj.concat_ayande()
+            post_obj.derive_bon_ayande()
             post_obj.delete_stop_words()
             post_obj.derive_bon_from_mozare()
-            posts_list.append(post_obj)
-
-            id += 1
 
     return posts_list
 
@@ -515,7 +525,6 @@ def parse_input(user_input):
     user_input, source_value, cat_value = cat_and_source_finder(user_input)
     third_list = find_other_words(user_input)
 
-
     dict = {
         "with_quotation": first_list,
         "with_exclamation_mark": second_list,
@@ -539,21 +548,26 @@ def create_data_dict(posts_list):
                 word_position_array = word_in_data_dict_value.get(post.id, None)
                 # age bud be tahesh ezafe mikard
                 if word_position_array is None:
+                    # if (word == 'خورد'):
+                    #     print(post.id)
+                    #     print("KKKKKKK")
+                    #     print(word_index)
                     DATA_DICT[word][post.id] = [word_index]
-                    # age word nabod misazatesh
+                    # age nabod misazatesh
                 else:
                     DATA_DICT[word][post.id].append(word_index)
             # age WORD nabod bia besazesh
             else:
+                # if (word == 'خورد'):
+                #     print(post.id)
+                #     print("KKKKKKK")
+                #     print(word_index)
                 DATA_DICT[word] = {post.id: [word_index]}
 
 
 def search_in_dict_one_word(word):
     global DATA_DICT
-    # data_row = []
-    # data_row = DATA_DICT.get(word)
-    # if word in DATA_DICT.keys():
-    data_row = [k for k in DATA_DICT.get(word)]
+    data_row = [k for k in DATA_DICT.get(word, [])]
     return data_row
 
 
@@ -631,6 +645,10 @@ def get_input(u_input):
     flag1 = 0
     flag2 = 0
     flag3 = 0
+
+    u_input = manipulate_query(u_input, all_tokens_set, COMBINATIONAL_WORDS)
+    print(u_input)
+
     if u_input.__contains__("طهران"):
         u_input = u_input.replace("طهران", "تهران")
     if u_input.__contains__("اتومبیل"):
@@ -707,7 +725,10 @@ def get_input(u_input):
             temp3.extend(list(set(search_in_dict_statement(i)).intersection(set(final_statement))))
             final_statement = temp3
             temp3 = []
-    final_statement = list(dict.fromkeys(final_statement))
+
+    if final_statement is None:
+        final_statement = []
+    final_statement = list(final_statement)
 
     if flag1 == 1 and flag2 == 0 and flag3 == 0:
         my_result = set(final_not).intersection(set(final_statement))

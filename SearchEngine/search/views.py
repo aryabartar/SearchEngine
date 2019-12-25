@@ -25,6 +25,7 @@ def post(request, post_id):
 def search(request):
     if request.method == 'POST':
         search_query = request.POST.get('search_query')
+
         result_list = get_input(search_query)
         return render(request, 'search-result.html', {"result_list": result_list})
     else:
