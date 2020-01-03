@@ -1,45 +1,37 @@
-COMBINATIONAL_WORDS = ['عن قریب', 'من جمله', 'فی ذلک', 'مع هذا', 'علی حده', 'فی مابین']
+import math
+import numpy as np
+
+dict = {"MahSa": {3: [2, 4, 7, 9], 4: [6, 9, 13]}, "Akbar": {14: [3, 4, 5]}, "as": {14: [6, 7, 8]}}
 
 
-def combination_connector(content_token_list, COMBINATIONAL_WORDS):
-    def remove_space_from_string(string):
-        return string.replace(" ", "")
-
-    for combinational_word in COMBINATIONAL_WORDS:
-        combinational_words_list = combinational_word.split(" ")
-
-        j = 0
-
-        try:
-            i = content_token_list.index(combinational_words_list[j])
-            initial_i = i
-        except ValueError as verr:
-            continue
-
-        found = True
-        while j < len(combinational_words_list):
-            if combinational_words_list[j] != content_token_list[i]:
-                found = False
-            j += 1
-            i += 1
-
-        if found:
-            content_token_list[initial_i] = remove_space_from_string(combinational_word)
-            for _ in range(len(combinational_words_list) - 1):
-                content_token_list.pop(initial_i + 1)
-
-    return content_token_list
+def get_lengths(dict, token):
+    return len(dict.get(token, {}).keys())
 
 
-# for user input
-def string_combination_connector(user_input, COMBINATIONAL_WORDS):
-    result_list = combination_connector(user_input.split(" "), COMBINATIONAL_WORDS)
-    result_str = ""
-    for item in result_list:
-        result_str += item
-        result_str += " "
-
-    return result_str
+def get_len_char(dict, token, docid):
+    key = dict.get(token, {})
+    result = key.get(docid, [])
+    return len(result)
 
 
-print(string_combination_connector("من فی مابین سلام", COMBINATIONAL_WORDS))
+# final = np.zeros((1731, 542879))
+final = [[0] * 542879] * 1731
+
+
+def calculate():
+    for i, key in enumerate(DATA_DICT.keys()):
+        for j in range(0, 1731):
+            w = (math.log10(1 + get_len_char(DATA_DICT, key, j))) * (
+                math.log10(1731 / get_lengths(DATA_DICT, key)))
+            final[j][i] = w
+
+
+def print_nonzero(row):
+    for i in row:
+        if i != 0:
+            print(i)
+
+
+calculate()
+print_nonzero(final[4])
+

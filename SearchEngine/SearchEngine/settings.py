@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-
+import math
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import numpy as np
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
@@ -251,7 +253,8 @@ STATICFILES_DIRS = [
 
 
 import csv
-from .string_manipulating_functions import remove_ha, remove_aan, manipulate_query, combination_connector
+from .string_manipulating_functions import remove_haye, remove_ha, remove_tar, remove_shenase_fel_mazi_mozare, \
+    remove_aan, remove_ye, remove_tarin, remove_shenase, manipulate_query, combination_connector
 
 FUTURE = ['نخواهند', 'نخواهید', 'نخواهیم', 'نخواهد', 'نخواهی', 'نخواهم', 'بخواهند', 'بخواهید', 'بخواهیم', 'بخواهد',
           'بخواهی', 'بخواهم', 'خواهند', 'خواهید', 'خواهیم', 'خواهد', 'خواهی', 'خواهم']
@@ -259,15 +262,24 @@ PREFIX_MOZARE = ["می", "نمی", "ب", "ن"]
 SUFFIX_MOZARE = ['م', 'ی', 'د', 'یم', 'ید', 'ند']
 PAST = ['باشند', 'باشید', 'باشیم', 'باشد', 'باشی', 'باشم', 'بودند', 'بودید', 'بودیم', 'بود', 'بودی', 'بودم', 'اند',
         'اید', 'ایم', 'است', 'ای', 'ام', 'ند', 'ید', 'یم', '', 'ی', 'م']
-PRESENT_ROOT = ['شو', 'کن']
-STOP_WORDS_LIST = ['از', 'با', 'را', 'و']
-# COMBINATIONAL_WORDS = ['فی مابین']
-COMBINATIONAL_WORDS = ['عن قریب', 'من جمله', 'فی ذلک', 'مع هذا', 'علی حده', 'فی مابین']
-SYNONYM_WORDS_DICT = {'تهران': ['طهران'], 'ماشین': ['اتومبیل']}
+PRESENT_ROOT = ['شو', 'کن', 'خور']
+STOP_WORDS_LIST = ['از', 'با', 'را', 'و', 'ها', 'هایی', 'ترین', 'عمر', 'به', 'تر']
+
+COMBINATIONAL_WORDS = ['عن قریب', 'من جمله', 'فی ذلک', 'مع هذا', 'علی حده', 'فی مابین', 'نیروی انتظامی جمهوری اسلامی',
+                       'جمهوری اسلامی']
+
+SYNONYM_WORDS_DICT = {'تهران': ['طهران'], 'ماشین': ['اتومبیل'], 'بلیت': ['بلیط'], 'توفان': ['طوفان'], 'زغال': ['ذغال'],
+                      'پطرزبورگ': ['پترزبورگ'], 'اتاق': ['اطاق'], 'امپراتور': ['امپراطور'], 'تراز': ['طراز'],
+                      'تپش': ['طپش'], 'تئاتر': ['تاتر'], 'پروفسور': ['پرفسور'], 'هیئت': ['هیات'],
+                      'مسئول': ['مسوول'], 'مسئله': ['مساله'], 'لوت': ['لوط'], 'تاق': ['طاق'],
+                      'اختاپوس': ['اخطاپوس'], 'اتو': ['اطو'], 'توسی': ['طوسی'], 'نیرویانتظامیجمهوریاسلامی': ['ناجا'],
+                      'جمهوری اسلامی': ['ج.ا.']}
+
 not_list = list(range(1, 1731))
 posts_list = []
 rows = []
 all_tokens_set = set()
+len_for_each_doc = list()
 
 
 class Post:
@@ -317,8 +329,14 @@ class Post:
 
     def remove_plural_from_token(self):
         for i in range(0, len(self.content_token_list)):
+            self.content_token_list[i] = remove_haye(self.content_token_list[i])
             self.content_token_list[i] = remove_ha(self.content_token_list[i])
             self.content_token_list[i] = remove_aan(self.content_token_list[i], all_tokens_set)
+            # self.content_token_list[i] = remove_ye(self.content_token_list[i], all_tokens_set)
+            self.content_token_list[i] = remove_tarin(self.content_token_list[i], all_tokens_set)
+            self.content_token_list[i] = remove_tar(self.content_token_list[i], all_tokens_set)
+            self.content_token_list[i] = remove_shenase(self.content_token_list[i], all_tokens_set)
+            self.content_token_list[i] = remove_shenase_fel_mazi_mozare(self.content_token_list[i], all_tokens_set)
 
     def delete_stop_words(self):
         j = len(self.content_token_list) - 1
@@ -435,10 +453,12 @@ def create_post_objects(csv_path):
             combination_connector(post_obj.content_token_list, COMBINATIONAL_WORDS)
             post_obj.present_verb_correction()
             post_obj.concat_nim_fasele()
-            #post_obj.concat_ayande()
+            # post_obj.concat_ayande()
             post_obj.derive_bon_ayande()
             post_obj.delete_stop_words()
             post_obj.derive_bon_from_mozare()
+            len_for_each_doc.append(post_obj.content_token_list.__len__())
+            # print(post_obj.content_token_list.__len__())
 
     return posts_list
 
@@ -539,7 +559,6 @@ def parse_input(user_input):
 def create_data_dict(posts_list):
     for post in posts_list:
         content_token_list = post.content_token_list
-
         for word_index, word in enumerate(content_token_list):
             word_in_data_dict_value = DATA_DICT.get(word, None)
             # agar word vojod dasht
@@ -548,21 +567,35 @@ def create_data_dict(posts_list):
                 word_position_array = word_in_data_dict_value.get(post.id, None)
                 # age bud be tahesh ezafe mikard
                 if word_position_array is None:
-                    # if (word == 'خورد'):
-                    #     print(post.id)
-                    #     print("KKKKKKK")
-                    #     print(word_index)
                     DATA_DICT[word][post.id] = [word_index]
                     # age nabod misazatesh
                 else:
                     DATA_DICT[word][post.id].append(word_index)
             # age WORD nabod bia besazesh
             else:
-                # if (word == 'خورد'):
-                #     print(post.id)
-                #     print("KKKKKKK")
-                #     print(word_index)
                 DATA_DICT[word] = {post.id: [word_index]}
+
+
+# def create_vector():
+#     for post in posts_list:
+#         content_token_list = post.content_token_list
+#
+#         for word_index, word in enumerate(content_token_list):
+#             word_in_data_dict_value = DATA_DICT.get(word, None)
+#             # agar word vojod dasht
+#             if word_in_data_dict_value is not None:
+#                 # shomare post ro migereft (shomare news)
+#                 word_position_array = word_in_data_dict_value.get(post.id, None)
+#                 print("WWWW")
+#                 print(word_position_array.len)
+#                 print("aaaaa")
+#                 # age bud be tahesh ezafe mikard
+#                 if word_position_array is None:
+#                     DATA_DICT[word][post.id] = [word_index]
+#                     # age nabod misazatesh
+#                 else:
+#                     DATA_DICT[word][post.id].append(word_index)
+#             # age WORD nabod bia besazesh
 
 
 def search_in_dict_one_word(word):
@@ -645,14 +678,70 @@ def get_input(u_input):
     flag1 = 0
     flag2 = 0
     flag3 = 0
+    print(u_input)
+    for item in FUTURE:
+        if u_input.__contains__(item):
+            u_input = u_input.replace(item, '')
+
+    for bon in PRESENT_ROOT:
+        if u_input.__contains__(bon):
+            result = u_input.find(bon)
+            if u_input[result - 3:result] == "نمی":
+                if u_input[result + bon.__len__()] == "م":
+                    temp = u_input[result - 3: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__()] == "ی":
+                    temp = u_input[result - 3: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__()] == "د":
+                    temp = u_input[result - 3: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "یم":
+                    temp = u_input[result - 3: result + bon.__len__() + 2]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "ید":
+                    temp = u_input[result - 3: result + bon.__len__() + 2]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "ند":
+                    temp = u_input[result - 3: result + bon.__len__() + 2]
+                u_input = u_input.replace(temp, bon)
+
+    for bon in PRESENT_ROOT:
+        if u_input.__contains__(bon):
+            result = u_input.find(bon)
+            if u_input[result - 2:result] == "می":
+                if u_input[result + bon.__len__()] == "م":
+                    temp = u_input[result - 2: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__()] == "ی":
+                    temp = u_input[result - 2: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__()] == "د":
+                    temp = u_input[result - 2: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "یم":
+                    temp = u_input[result - 2: result + bon.__len__() + 2]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "ید":
+                    temp = u_input[result - 2: result + bon.__len__() + 2]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "ند":
+                    temp = u_input[result - 2: result + bon.__len__() + 2]
+                u_input = u_input.replace(temp, bon)
+
+    for bon in PRESENT_ROOT:
+        if u_input.__contains__(bon):
+            result = u_input.find(bon)
+            if u_input[result - 1] == "ب" or u_input[result - 1] == "ن":
+                if u_input[result + bon.__len__()] == "م":
+                    temp = u_input[result - 1: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__()] == "ی":
+                    temp = u_input[result - 1: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__()] == "د":
+                    temp = u_input[result - 1: result + bon.__len__() + 1]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "یم":
+                    temp = u_input[result - 1: result + bon.__len__() + 2]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "ید":
+                    temp = u_input[result - 1: result + bon.__len__() + 2]
+                elif u_input[result + bon.__len__():result + bon.__len__() + 1] == "ند":
+                    temp = u_input[result - 1: result + bon.__len__() + 2]
+                u_input = u_input.replace(temp, bon)
 
     u_input = manipulate_query(u_input, all_tokens_set, COMBINATIONAL_WORDS)
-    print(u_input)
 
-    if u_input.__contains__("طهران"):
-        u_input = u_input.replace("طهران", "تهران")
-    if u_input.__contains__("اتومبیل"):
-        u_input = u_input.replace("اتومبیل", "ماشین")
+    for key, value in SYNONYM_WORDS_DICT.items():
+        if u_input.__contains__(''.join(value)):
+            u_input = u_input.replace(''.join(value), key)
 
     result_dict = parse_input(u_input)
     first_list = result_dict.get("with_quotation", None)
@@ -762,8 +851,43 @@ CSV_PATH = 'data/input.csv'
 
 # save_xlx_to_csv(XLX_PATH, CSV_PATH)
 posts_list = create_post_objects(CSV_PATH)
+# print(len_for_each_doc)
 
 DATA_DICT = {}
-
+# print(sum(len_for_each_doc))
 create_data_dict(posts_list)
 
+
+def get_lengths(dict, token):
+    return len(dict.get(token, {}).keys())
+
+
+def get_len_char(dict, token, docid):
+    key = dict.get(token, {})
+    result = key.get(docid, [])
+    return len(result)
+
+
+def calculate():
+    ROW_NUM = len(posts_list)
+    COL_NUM = len(DATA_DICT.keys())
+
+    result = [None] * (ROW_NUM + 1)
+    for i in range(0, ROW_NUM + 1):
+        result[i] = [None] * COL_NUM
+
+    for i, key in enumerate(DATA_DICT.keys()):
+        for j in range(0, ROW_NUM + 1):
+            len_char = get_len_char(DATA_DICT, key, j)
+            length = get_lengths(DATA_DICT, key)
+
+            w = (math.log10(1 + len_char)) * (
+                math.log10(len(posts_list) / length))
+
+            result[j][i] = w
+    return result
+
+
+final = calculate()
+print(len(DATA_DICT.keys()))
+print(final[0])

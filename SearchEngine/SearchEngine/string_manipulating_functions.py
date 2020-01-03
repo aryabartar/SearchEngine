@@ -1,3 +1,10 @@
+def remove_haye(string):
+    if len(string) > 3:
+        if string[len(string) - 3: len(string) + 1] == "های":
+            string = string[0:len(string) - 3]
+    return string
+
+
 def remove_ha(string):
     if len(string) > 2:
         if string[len(string) - 2: len(string) + 1] == "ها":
@@ -10,6 +17,77 @@ def remove_aan(string, all_tokens_set):
         if string[0:len(string) - 2] in all_tokens_set and string[len(string) - 2: len(string) + 1] == "ان":
             new_string = string[0:len(string) - 2]
             string = new_string
+    return string
+
+
+def remove_ye(string, all_tokens_set):
+    # if len(string) > 2:
+    #     if string[0:len(string) - 1] in all_tokens_set and string[len(string) - 1: len(string) + 1] == "ی":
+    #         new_string = string[0:len(string) - 1]
+    #         string = new_string
+    return string
+
+
+def remove_tarin(string, all_tokens_set):
+    if len(string) > 4:
+        if string[0:len(string) - 4] in all_tokens_set and string[len(string) - 4: len(string) + 1] == "ترین":
+            new_string = string[0:len(string) - 4]
+            string = new_string
+    return string
+
+
+def remove_tar(string, all_tokens_set):
+    if len(string) > 2:
+        if string[0:len(string) - 2] in all_tokens_set and string[len(string) - 2: len(string) + 1] == "تر":
+            new_string = string[0:len(string) - 2]
+            string = new_string
+    return string
+
+
+def remove_shenase(string, all_tokens_set):
+    if len(string) > 2:
+        if string[0:len(string) - 1] in all_tokens_set and string[len(string) - 1: len(string) + 1] == "م":
+            new_string = string[0:len(string) - 1]
+            string = new_string
+        if string[0:len(string) - 1] in all_tokens_set and string[len(string) - 1: len(string) + 1] == "ت":
+            new_string = string[0:len(string) - 1]
+            string = new_string
+        elif string[0:len(string) - 1] in all_tokens_set and string[len(string) - 1: len(string) + 1] == "ش":
+            new_string = string[0:len(string) - 1]
+            string = new_string
+        elif string[0:len(string) - 3] in all_tokens_set and string[len(string) - 3: len(string) + 1] == "مان":
+            new_string = string[0:len(string) - 3]
+            string = new_string
+        elif string[0:len(string) - 3] in all_tokens_set and string[len(string) - 3: len(string) + 1] == "تان":
+            new_string = string[0:len(string) - 3]
+            string = new_string
+        elif string[0:len(string) - 3] in all_tokens_set and string[len(string) - 3: len(string) + 1] == "شان":
+            new_string = string[0:len(string) - 3]
+            string = new_string
+    return string
+
+
+def remove_shenase_fel_mazi_mozare(string, all_tokens_set):
+    # if len(string) > 2:
+    #     if string[0:len(string) - 2] in all_tokens_set and string[len(string) - 2: len(string) + 1] == "یم":
+    #         new_string = string[0:len(string) - 2]
+    #         string = new_string
+    #     elif string[0:len(string) - 2] in all_tokens_set and string[len(string) - 2: len(string) + 1] == "ید":
+    #         new_string = string[0:len(string) - 2]
+    #         string = new_string
+    #     elif string[0:len(string) - 2] in all_tokens_set and string[len(string) - 2: len(string) + 1] == "ند":
+    #         new_string = string[0:len(string) - 2]
+    #         string = new_string
+    #     elif string[0:len(string) - 1] in all_tokens_set and string[len(string) - 1: len(string) + 1] == "م":
+    #         new_string = string[0:len(string) - 1]
+    #         string = new_string
+    #     elif string[0:len(string) - 1] in all_tokens_set and string[len(string) - 1: len(string) + 1] == "ی":
+    #         new_string = string[0:len(string) - 1]
+    #         string = new_string
+    #     elif string[0:len(string) - 1] in all_tokens_set and string[len(string) - 1: len(string) + 1] == "د":
+    #         new_string = string[0:len(string) - 1]
+    #         string = new_string
+
     return string
 
 
@@ -27,6 +105,9 @@ def combination_connector(content_token_list, COMBINATIONAL_WORDS):
             initial_i = i
         except ValueError as verr:
             continue
+
+
+
 
         found = True
         while j < len(combinational_words_list):
@@ -48,8 +129,14 @@ def manipulate_query(query, all_tokens_set, COMBINATIONAL_WORDS):
     words_list = query.split(" ")
 
     for i, word in enumerate(words_list):
+        words_list[i] = remove_haye(word)
         words_list[i] = remove_ha(word)
         words_list[i] = remove_aan(words_list[i], all_tokens_set)
+        words_list[i] = remove_ye(words_list[i], all_tokens_set)
+        words_list[i] = remove_tarin(words_list[i], all_tokens_set)
+        words_list[i] = remove_tar(words_list[i], all_tokens_set)
+        words_list[i] = remove_shenase(words_list[i], all_tokens_set)
+        words_list[i] = remove_shenase_fel_mazi_mozare(words_list[i], all_tokens_set)
 
     result_query = ""
 
@@ -69,4 +156,3 @@ def string_combination_connector(user_input, COMBINATIONAL_WORDS):
         result_str += " "
 
     return result_str
-
